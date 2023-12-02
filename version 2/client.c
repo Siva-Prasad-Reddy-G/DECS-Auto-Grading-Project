@@ -21,7 +21,7 @@ double GetTime() {
     int rc = gettimeofday(&t, NULL);
     return (double) t.tv_sec + (double) t.tv_usec/1e6;
 }
-//function to send file to receiver , first send the file size then send by parts
+
 int send_file(int sockfd,char *file_path)
 {
     char buffer[BUFFER_SIZE];
@@ -105,7 +105,6 @@ int main(int argc, char const *argv[])
 
     double start_loop=GetTime();
 
-  //iterate for loop times
     while(loop--)
     {
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -150,7 +149,6 @@ int main(int argc, char const *argv[])
 
         double Tsend=GetTime();
 
-      //send file function
         if ( send_file(sockfd,file_path)  != 0)
         {   
             printf ("Error sending source file\n");
@@ -194,7 +192,6 @@ int main(int argc, char const *argv[])
 
     double end_loop=GetTime();
 
-  //calculation total loop time.
     double loop_time=end_loop-start_loop;
     float average = (float) sum/icount;
 
