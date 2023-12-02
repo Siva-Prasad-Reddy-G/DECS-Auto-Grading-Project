@@ -11,12 +11,14 @@
 #include <sys/time.h>
 #include <pthread.h>
 
-
+// Structure for circular queue
 typedef struct {
     int *data;
     int front, rear;
     int size, max_size;
 } CircularQueue;
+
+// Initializing the circular queue
 
 void initializeQueue(CircularQueue *queue, int max_size) {
     queue->front = queue->rear = -1;
@@ -25,14 +27,17 @@ void initializeQueue(CircularQueue *queue, int max_size) {
     queue->data = (int *)malloc(max_size * sizeof(int));
 }
 
+// Check if the queue is empty
 int isEmpty(CircularQueue *queue) {
     return (queue->size == 0);
 }
 
+// Check if the queue is full
 int isFull(CircularQueue *queue) {
     return (queue->size == queue->max_size);
 }
 
+// Get the front element of the queue
 int getFront(CircularQueue *queue) {
     if (isEmpty(queue)) {
         printf("Queue is empty\n");
@@ -40,7 +45,7 @@ int getFront(CircularQueue *queue) {
     }
     return queue->data[queue->front];
 }
-
+// Add a new element to the queue
 void push(CircularQueue *queue, int value) {
     if (isFull(queue)) {
         printf("Queue is full\n");
@@ -57,6 +62,7 @@ void push(CircularQueue *queue, int value) {
     queue->size++;
 }
 
+// Remove and return an element from the queue
 int pop(CircularQueue *queue) {
     if (isEmpty(queue)) {
         printf("Queue is empty\n");
@@ -76,22 +82,26 @@ int pop(CircularQueue *queue) {
 
     return value;
 }
-
+// Global variable for the thread pool
 CircularQueue threadPool;
 
+// Error handling function
 void error(const char *msg) {
     perror(msg);
     exit(1);
 }
 
+// Function to compare the content of two strings
 int compareContent(const char *file_output) {
     const char *desired_output = "1 2 3 4 5 6 7 8 9 10 ";
     return strcmp(file_output, desired_output);
 }
 
+// Mutex and condition variables for thread synchronization
 pthread_mutex_t lock;
 pthread_cond_t sp_avail, it_avail;
 
+// Function to handle each client in a separate thread
 
 void* handleClient() {
 
@@ -104,6 +114,7 @@ void* handleClient() {
     client_socket = pop(&threadPool);
     pthread_cond_signal(&sp_avail);
     pthread_mutex_unlock(&lock);
+    // Code for handling the client request
     char buffer[5000];
     int n;
     bzero(buffer, 5000);
@@ -205,10 +216,12 @@ void* handleClient() {
 }
 
 int main(int argc, char *argv[]) {
+   // Command line arguments check
     if (argc != 3) {
         fprintf(stderr, "Usage: ./server port num_of_threads\n");
         exit(1);
     }
+    // Initialization of the thread pool
     int max_size = atoi(argv[2]);
     initializeQueue(&threadPool, max_size);
     pthread_mutex_init(&lock,NULL);
@@ -216,9 +229,12 @@ int main(int argc, char *argv[]) {
     pthread_cond_init(&it_avail,NULL);
     int sockfd, newsockfd, portno, n;
     char buffer[5000];
+
+    // Socket-related variables
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;
-
+  
+    // Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         error("Error opening socket\n");
@@ -227,18 +243,20 @@ int main(int argc, char *argv[]) {
     bzero((char *)&serv_addr, sizeof(serv_addr));
 
     portno = atoi(argv[1]);
-
+	 // Initialize server address struct
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
 
+	 // Bind the socket to a specific port
     if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         error("Binding Failed\n");
     }
-
+	 // Listen for incoming connections
     listen(sockfd, 1000);
     clilen = sizeof(cli_addr);
 
+	 // Create worker threads
    for(int d=0;d<max_size;d++){
         pthread_t thread;
    	if (pthread_create(&thread, NULL, handleClient, NULL) < 0) {
@@ -246,14 +264,16 @@ int main(int argc, char *argv[]) {
             return 1;
         }
    }
-
+ // Main server loop
     while (1) {
-      
+
+	// Accept new client connection
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
 
         if (newsockfd < 0) {
             error("Error on accept");
         }
+	    // Add the new client socket to the thread pool
         pthread_mutex_lock(&lock);
 	 if (isFull(&threadPool)) {
         	pthread_cond_wait(&sp_avail,&lock);
@@ -262,7 +282,8 @@ int main(int argc, char *argv[]) {
     	pthread_cond_signal(&it_avail);
     	pthread_mutex_unlock(&lock);
     }
-
+	
+ // Close the server socket
     close(sockfd);
     return 0;
 }
