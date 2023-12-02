@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr,
           server->h_length);
 
-    // creating the buffers
+    // creating the buffers and getting data from input arguments
     char fbuff[10000];
     fname = argv[3];
     int fd = open(fname, O_RDONLY);
@@ -138,8 +138,7 @@ int main(int argc, char *argv[])
             struct timeval end_time;
             gettimeofday(&end_time, NULL);
 
-            // write(1,res,resbytes);
-            // printf("%s\n",res);
+               //calculate time difference
             int t_diff = (end_time.tv_sec * 1000 + end_time.tv_usec / 1000) - (start_time.tv_sec * 1000 + start_time.tv_usec / 1000);
             time_sum += t_diff;
         }
@@ -147,12 +146,12 @@ int main(int argc, char *argv[])
         close(sockfd);
     }
 
-    // creating the variable of time timeval
+    // get loo end time and calculate total time
     struct timeval end_time;
     gettimeofday(&end_time, NULL);
     int t_diff = (end_time.tv_sec * 1000 + end_time.tv_usec / 1000) - (start_time.tv_sec * 1000 + start_time.tv_usec / 1000);
 
-    // finding the average time
+    // comuting the average response time
     float average = (float)time_sum / ic;
     printf("average:%f \nloop_iterations:%d \ntotal_time:%d \nthroughput:%f\ntimeouts:%d\n", average, ic, t_diff, (float)(succ * 1000) / t_diff, timeout_err);
 
