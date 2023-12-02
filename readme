@@ -1,1 +1,50 @@
+In this Auto-grading Project we will create client and a server for grading the code send by client.And in the loadtest we will measure the performance of the server 
+as a function of the increasing load(simulating multiple simultaneous clients) i.e  The client sends a grading request, wait’s for response, then sleeps for
+some time, then sends the next request, and continues like this. This loop with some M clients is run for a few iterations.
 
+Here we have implemented 4 versions.
+Version-1:
+  Single-Threaded Server
+  How to run:
+       gcc server.c -o server
+       gcc client.c -o client
+            ./server <port_num>
+            bash loadtest.sh <number of clients> <loop num> <sleep time>
+            bash analysis.sh
+Version -2:
+  Multi-Threaded Server (create-destroy)
+  Here we will create a thread for every request and kill the thread after serving a request.
+  How to run:
+    gcc server.c -o server -pthread
+    gcc client.c -o client
+        ./server <port_num> 
+        bash loadtest.sh <number of clients> <loop num> <sleep time> <timeout-secs>
+        bash analysis.sh <loop num> <sleep time> <timeout-secs>
+Version-3:
+   Thread-Pool Server
+   Here we will create predifined number of threads, and these threads continuously servers the requests infinite times.
+   How to run:
+        gcc server.c -o server -pthread
+        gcc client.c -o client
+            ./server <port_num> <thread-pool-size>
+        bash loadtest.sh <number of clients> <loop num> <sleep time> <timeout-secs>
+        bash analysis.sh <loop num> <sleep time> <timeout-secs>
+Version-4:
+  Asynchronous Server
+     Goal of this version is to turn the server architecture into an asynchronous grading architecture
+     Client is no longer waiting for grading task, we will queue all the requests and when the client sends a request we will inform it whether it's request is in
+     the queue, or being processed, or it completed.
+     The client sends the requests periodically until it's request is completed at the server side.
+     Here will use  request-id which is unique for clients to identify the requests of particular client.
+     How to run:
+        g++ -std=c++17 server.cpp FileQueue.cpp FileQueue.h utility.cpp utility.h -pthread -o server
+        g++ client.cpp utility.cpp utility.h
+            ./server <port-num> <Thread-pool-size>
+            ./client <serverIP> <port> <typeOfRequest(0/1)> <sourceCodeFileTobeGraded|requestID>
+
+   If the typeofRequest is 0 , we are sending a new request i.e sending a file to be graded.
+   If the typeofRequest is 1, we are sending a request to check the status, here we need to give our requestID which will be unique for all clients.
+             
+
+        
+        
