@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
         perror("Usage: ./submit  <serverIP> <port> <typeOfRequest(0/1)> <sourceCodeFileTobeGraded|requestID>\n");
         return -1;
     }
-  //get values from arguments
     
     int typeOfRequest=atoi(argv[3]);
     char *requestId,*file_path;
@@ -63,7 +62,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    //if the type request is 0, send the file to server, and get back the message from server.
+    
 	if(typeOfRequest==0)
 	{
 		file_path=argv[4];
@@ -83,7 +82,6 @@ int main(int argc, char *argv[])
     	recv(sockfd,message,1000,0);
     	printf("%s\n",message);
     	cout<<"started with reqID"<<req_id<<endl;
-    //run for infinite times
     	while(1)
     	{
     		
@@ -97,7 +95,6 @@ int main(int argc, char *argv[])
         		return -1;
     		}
     		int type=atoi(receive_type);
-        //if type is 3 it is begin processed
     		if(type==3)
     		{
     			char pos_recv[size_int];
@@ -111,7 +108,6 @@ int main(int argc, char *argv[])
     			printf("Server Response: Request is being processed in  queue , at position: %d\n",position);
 
     		}
-          //if type is 0 it is still waiting
     		else if(type==0)
     		{
     			char pos_recv[size_int];
@@ -124,14 +120,12 @@ int main(int argc, char *argv[])
     		
     			printf("Server Response: Request is in the queue , at position: %d\n",position);
     		}
-          //if type is 1 it is not found
     		else if(type==1)
     		{
     			printf("Request not found!\n");	    		}
     		else
     		{
     			string reqId(requestId);
-          //get the file from server as response
     			string fileName="./received_Response/Recv_"+reqId+".txt";
     			if(recv_file(sockfd,fileName))
     			{
@@ -146,7 +140,6 @@ int main(int argc, char *argv[])
 
     	}
 	}
-    //if typerequest is 1, send the requestID and get back the status of reqeust from server
 	else
 	{  
 		requestId=argv[4]; 
@@ -155,29 +148,25 @@ int main(int argc, char *argv[])
 	
 		int size_int=sizeof(int);
 		char receive_type[size_int];
-
-    //get the status type from server
     	if (recv(sockfd, receive_type, sizeof(receive_type), 0) == -1)
     	{
         	perror("Error receiving position.");
         	return -1;
     	}
     	int type=atoi(receive_type);
-    //if status type is 3 it is in process
         if(type==3)
-    		{
-    			char pos_recv[size_int];
-    			if (recv(sockfd, pos_recv, sizeof(pos_recv), 0) == -1)
-    			{
-        			perror("Error receiving position.");
-        			return -1;
-    			}
-    			int position=atoi(pos_recv);
-    		
-    			printf("Server Response: Request is being processed in  queue , at position: %d\n",position);
+            {
+                char pos_recv[size_int];
+                if (recv(sockfd, pos_recv, sizeof(pos_recv), 0) == -1)
+                {
+                    perror("Error receiving position.");
+                    return -1;
+                }
+                int position=atoi(pos_recv);
+            
+                printf("Server Response: Request is being processed in  queue , at position: %d\n",position);
 
-    		}
-    //if type is 0 it is still waiting in queue
+            }
     	if(type==0){
     		char pos_recv[size_int];
     		if (recv(sockfd, pos_recv, sizeof(pos_recv), 0) == -1)
@@ -189,7 +178,6 @@ int main(int argc, char *argv[])
     		
     		printf("Server Response: Request is in the queue , at position: %d\n",position);
     	}
-        //if type is 1, it is not found 
     	else if(type==1){
     		printf("Request not found!\n");	
     	}
