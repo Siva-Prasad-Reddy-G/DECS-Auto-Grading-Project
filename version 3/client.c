@@ -137,6 +137,8 @@ int main(int argc, char *argv[])
             // end time
             struct timeval end_time;
             gettimeofday(&end_time, NULL);
+
+            
             int t_diff = (end_time.tv_sec * 1000 + end_time.tv_usec / 1000) - (start_time.tv_sec * 1000 + start_time.tv_usec / 1000);
             time_sum += t_diff;
         }
